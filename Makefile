@@ -29,17 +29,20 @@ PLUGIN_SOURCE_FILES = $(SRCDIR)/plugin.cpp \
                       $(SRCDIR)/print.cpp \
                       $(SRCDIR)/cfgviz.cpp \
                       $(SRCDIR)/mpicoll.cpp \
-                      $(SRCDIR)/frontier.cpp
+                      $(SRCDIR)/frontier.cpp \
+                      $(SRCDIR)/pragma.cpp
 
 PLUGIN_INCLUDES_FILES = $(INCLUDEDIR)/print.h \
                         $(INCLUDEDIR)/cfgviz.h \
                         $(INCLUDEDIR)/mpicoll.h \
                         $(INCLUDEDIR)/frontier.h \
+                        $(INCLUDEDIR)/pragma.h \
                         $(INCLUDEDIR)/MPI_collectives.def
 
 TARGETS = $(BINDIR)/hw.out \
           $(BINDIR)/ok.out \
-          $(BINDIR)/simple.out
+          $(BINDIR)/simple.out \
+          $(BINDIR)/pragma.out
 
 # ============================= Targets and rules ============================ #
 # ------------------------------ Default target ------------------------------ #
@@ -71,6 +74,11 @@ $(BINDIR)/ok.out: $(TESTSDIR)/ok.c \
 	$(MPICC) $(CFLAGS) -o $@ -fplugin=./$(PLUGIN) $<
 
 $(BINDIR)/simple.out: $(TESTSDIR)/simple.c \
+                      $(PLUGIN) \
+                      $(BINDIR)
+	$(MPICC) $(CFLAGS) -o $@ -fplugin=./$(PLUGIN) $<
+
+$(BINDIR)/pragma.out: $(TESTSDIR)/pragma.c \
                       $(PLUGIN) \
                       $(BINDIR)
 	$(MPICC) $(CFLAGS) -o $@ -fplugin=./$(PLUGIN) $<

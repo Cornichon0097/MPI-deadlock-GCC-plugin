@@ -24,6 +24,7 @@
 #include "cfgviz.h"
 #include "mpicoll.h"
 #include "frontier.h"
+#include "pragma.h"
 
 /*
  * Ensures the plugin is build for GCC 12.2.0.
@@ -158,6 +159,8 @@ int plugin_init(struct plugin_name_args *const plugin_info,
 
         register_callback(plugin_info->base_name, PLUGIN_PASS_MANAGER_SETUP,
                           NULL, &mpi_pass_info);
+        register_callback(plugin_info->base_name, PLUGIN_PRAGMAS,
+                          &register_pragma_mpicoll, NULL);
 
         return 0;
 }
