@@ -22,7 +22,7 @@
 
 #include "print.h"
 #include "cfgviz.h"
-#include "mpi_call.h"
+#include "mpicoll.h"
 #include "frontier.h"
 
 /*
@@ -78,7 +78,7 @@ public:
          */
         bool gate(function *const fun)
         {
-                return true;
+                return false;
         }
 
         /*
@@ -92,10 +92,10 @@ public:
 
                 /* print_function_name(fun); */
 
-                while (mpi_call_check(fun))
-                        mpi_call_split(fun);
+                while (mpicoll_check(fun))
+                        mpicoll_split(fun);
 
-                mpi_call_mark_code(fun);
+                mpicoll_mark_code(fun);
 
                 /* print_blocks(fun); */
                 /* cfgviz_dump(fun, "cfg"); */
@@ -113,7 +113,7 @@ public:
                 /* print_cfg(fun, cfg); */
                 /* cfgviz_dump_cfg(fun, "bis", cfg); */
 
-                ranks = mpi_call_ranks(fun, cfg);
+                ranks = mpicoll_ranks(fun, cfg);
                 groups = frontier_make_groups(fun, ranks);
 
                 /* pdf = frontier_compute_post_dominance(fun);
@@ -131,7 +131,7 @@ public:
                 free(cfg);
 
                 free_dominance_info(CDI_POST_DOMINATORS);
-                mpi_call_sanitize(fun);
+                mpicoll_sanitize(fun);
 
                 return 0U;
         }

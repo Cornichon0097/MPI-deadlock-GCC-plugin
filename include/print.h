@@ -38,7 +38,7 @@ void print_called_functions(basic_block bb);
 /*
  * Prints the function’s name called in stmt if it is a MPI collective.
  */
-void print_mpi_call_name(const gimple *stmt);
+void print_mpicoll_name(const gimple *stmt);
 
 /*
  * Prints basic blocks domination in fun. If the dominance information is not

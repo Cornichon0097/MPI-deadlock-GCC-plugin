@@ -22,7 +22,7 @@
 #include <diagnostic-core.h>
 
 #include "print.h"
-#include "mpi_call.h"
+#include "mpicoll.h"
 #include "frontier.h"
 
 /*
@@ -84,7 +84,7 @@ void print_called_functions(const basic_block bb)
 /*
  * Prints the function’s name called in stmt if it is a MPI collective.
  */
-void print_mpi_call_name(const gimple *const stmt)
+void print_mpicoll_name(const gimple *const stmt)
 {
         const char *fname;
         int i;
@@ -174,7 +174,7 @@ void print_warning(function *const fun, const bitmap groups, const bitmap pdf)
                 if (!bitmap_empty_p(&(pdf[i]))) {
                         EXECUTE_IF_SET_IN_BITMAP(&(groups[i]), 0, bb_index, bi) {
                                 bb = BASIC_BLOCK_FOR_FN(fun, bb_index);
-                                warning_at(mpi_call_location(bb), 0,
+                                warning_at(mpicoll_location(bb), 0,
                                            "possible MPI deadlock");
                         }
 

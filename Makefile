@@ -28,12 +28,12 @@ PLUGIN = libmpiplugin.so
 PLUGIN_SOURCE_FILES = $(SRCDIR)/plugin.cpp \
                       $(SRCDIR)/print.cpp \
                       $(SRCDIR)/cfgviz.cpp \
-                      $(SRCDIR)/mpi_call.cpp \
+                      $(SRCDIR)/mpicoll.cpp \
                       $(SRCDIR)/frontier.cpp
 
 PLUGIN_INCLUDES_FILES = $(INCLUDEDIR)/print.h \
                         $(INCLUDEDIR)/cfgviz.h \
-                        $(INCLUDEDIR)/mpi_call.h \
+                        $(INCLUDEDIR)/mpicoll.h \
                         $(INCLUDEDIR)/frontier.h \
                         $(INCLUDEDIR)/MPI_collectives.def
 

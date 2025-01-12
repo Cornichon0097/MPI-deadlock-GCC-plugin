@@ -51,7 +51,7 @@ bitmap frontier_compute_cfg_bis(const function *fun);
  * collective codes must be set in basic blocks’s aux field before calling this
  * function.
  *
- * See mpi_call_mark_code() for details.
+ * See mpicoll_mark_code() for details.
  */
 bitmap frontier_make_groups(const function *fun, bitmap ranks);
 

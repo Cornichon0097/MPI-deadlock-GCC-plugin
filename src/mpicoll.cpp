@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include "mpi_call.h"
+#include "mpicoll.h"
 
 /*
  * Returns the MPI collective code if stmt is a call to an MPI function defined
@@ -30,7 +30,7 @@
  *
  * See include/MPI_collectives.def for details.
  */
-static enum mpi_collective_code mpi_call_code(const gimple *const stmt)
+static enum mpi_collective_code mpicoll_code(const gimple *const stmt)
 {
         const char *fname;
         int i;
@@ -55,7 +55,7 @@ static enum mpi_collective_code mpi_call_code(const gimple *const stmt)
  *
  * See include/MPI_collectives.def for details.
  */
-void mpi_call_mark_code(const function *const fun)
+void mpicoll_mark_code(const function *const fun)
 {
         basic_block bb;
         gimple_stmt_iterator gsi;
@@ -65,7 +65,7 @@ void mpi_call_mark_code(const function *const fun)
                 bb->aux = (void *) LAST_AND_UNUSED_MPI_COLLECTIVE_CODE;
 
                 for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
-                        code = mpi_call_code(gsi_stmt(gsi));
+                        code = mpicoll_code(gsi_stmt(gsi));
 
                         if (code != LAST_AND_UNUSED_MPI_COLLECTIVE_CODE)
                                 bb->aux = (void *) code;
@@ -76,7 +76,7 @@ void mpi_call_mark_code(const function *const fun)
 /*
  * Sanitises basic blocks’s fields in fun.
  */
-void mpi_call_sanitize(const function *const fun)
+void mpicoll_sanitize(const function *const fun)
 {
         basic_block bb;
 
@@ -87,7 +87,7 @@ void mpi_call_sanitize(const function *const fun)
 /*
  * Returns the number of MPI collectives in bb.
  */
-static int mpi_call_nb(const basic_block bb)
+static int mpicoll_nb(const basic_block bb)
 {
         gimple_stmt_iterator gsi;
         gimple *stmt;
@@ -96,7 +96,7 @@ static int mpi_call_nb(const basic_block bb)
         for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
                 stmt = gsi_stmt(gsi);
 
-                if (mpi_call_code(stmt) != LAST_AND_UNUSED_MPI_COLLECTIVE_CODE)
+                if (mpicoll_code(stmt) != LAST_AND_UNUSED_MPI_COLLECTIVE_CODE)
                         count = count + 1;
         }
 
@@ -107,12 +107,12 @@ static int mpi_call_nb(const basic_block bb)
  * Returns true if at least one basic block in fun contains at least 2 MPI
  * collectives, false otherwise.
  */
-bool mpi_call_check(const function *const fun)
+bool mpicoll_check(const function *const fun)
 {
         basic_block bb;
 
         FOR_EACH_BB_FN(bb, fun) {
-                if (mpi_call_nb(bb) >= 2)
+                if (mpicoll_nb(bb) >= 2)
                         return true;
         }
 
@@ -123,7 +123,7 @@ bool mpi_call_check(const function *const fun)
  * Splits bb at the first MPI collective statement in basic block. If no MPI
  * collective statement is found in the basic block, then bb stays unchanged.
  */
-static void mpi_call_split_block(basic_block bb)
+static void mpicoll_split_block(basic_block bb)
 {
         gimple_stmt_iterator gsi;
         gimple *stmt;
@@ -131,7 +131,7 @@ static void mpi_call_split_block(basic_block bb)
         for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
                 stmt = gsi_stmt(gsi);
 
-                if (mpi_call_code(stmt) != LAST_AND_UNUSED_MPI_COLLECTIVE_CODE)
+                if (mpicoll_code(stmt) != LAST_AND_UNUSED_MPI_COLLECTIVE_CODE)
                         split_block(bb, stmt);
         }
 }
@@ -139,13 +139,13 @@ static void mpi_call_split_block(basic_block bb)
 /*
  * Splits each basic block in fun that contains at least 2 MPI collectives.
  */
-void mpi_call_split(const function *const fun)
+void mpicoll_split(const function *const fun)
 {
         basic_block bb;
 
         FOR_EACH_BB_FN(bb, fun) {
-                if (mpi_call_nb(bb) >= 2)
-                        mpi_call_split_block(bb);
+                if (mpicoll_nb(bb) >= 2)
+                        mpicoll_split_block(bb);
         }
 }
 
@@ -153,7 +153,7 @@ void mpi_call_split(const function *const fun)
  * Ranks bb and all of its successors using cfg if they contain a MPI
  * collective. If bb do not contain a MPI collective, then its rank is 0.
  */
-static void mpi_call_rank_next(const bitmap cfg, const basic_block bb,
+static void mpicoll_rank_next(const bitmap cfg, const basic_block bb,
                                bitmap ranks, int current_rank)
 {
         edge e;
@@ -166,7 +166,7 @@ static void mpi_call_rank_next(const bitmap cfg, const basic_block bb,
 
         FOR_EACH_EDGE(e, ei, bb->succs) {
                 if (bitmap_bit_p(&(cfg[bb->index]), e->dest->index))
-                        mpi_call_rank_next(cfg, e->dest, ranks, current_rank);
+                        mpicoll_rank_next(cfg, e->dest, ranks, current_rank);
         }
 }
 
@@ -174,7 +174,7 @@ static void mpi_call_rank_next(const bitmap cfg, const basic_block bb,
  * Returns MPI collectives’s rank in fun using cfg. Loop backedges in cfg must
  * be removed from cfg before calling this function to avoid an infinite loop.
  */
-bitmap mpi_call_ranks(const function *const fun, const bitmap cfg)
+bitmap mpicoll_ranks(const function *const fun, const bitmap cfg)
 {
         bitmap_head *ranks = XNEWVEC(bitmap_head, last_basic_block_for_fn(fun));
         basic_block bb;
@@ -182,7 +182,7 @@ bitmap mpi_call_ranks(const function *const fun, const bitmap cfg)
         FOR_ALL_BB_FN(bb, fun)
                 bitmap_initialize(&(ranks[bb->index]), &bitmap_default_obstack);
 
-        mpi_call_rank_next(cfg, ENTRY_BLOCK_PTR_FOR_FN(fun), ranks, 0);
+        mpicoll_rank_next(cfg, ENTRY_BLOCK_PTR_FOR_FN(fun), ranks, 0);
 
         return ranks;
 }
@@ -192,9 +192,9 @@ bitmap mpi_call_ranks(const function *const fun, const bitmap cfg)
  * MPI collective gimple statement. If bb does not contain MPI collective, this
  * function returns UNKNOWN_LOCATION.
  *
- * See mpi_call_split() for details.
+ * See mpicoll_split() for details.
  */
-location_t mpi_call_location(const basic_block bb)
+location_t mpicoll_location(const basic_block bb)
 {
         gimple_stmt_iterator gsi;
         gimple *stmt;

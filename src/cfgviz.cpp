@@ -20,7 +20,7 @@
 #include <stdio.h>
 
 #include "cfgviz.h"
-#include "mpi_call.h"
+#include "mpicoll.h"
 
 /*
  * Builds a filename (as a string) based on fun’s name and suffix.

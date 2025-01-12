@@ -46,23 +46,23 @@ const char *const MPI_COLLECTIVE_NAME[] = {
  *
  * See include/MPI_collectives.def for details.
  */
-void mpi_call_mark_code(const function *fun);
+void mpicoll_mark_code(const function *fun);
 
 /*
  * Sanitises basic blocks’s fields in fun.
  */
-void mpi_call_sanitize(const function *fun);
+void mpicoll_sanitize(const function *fun);
 
 /*
  * Returns true if at least one basic block in fun contains at least 2 MPI
  * collectives, false otherwise.
  */
-bool mpi_call_check(const function *fun);
+bool mpicoll_check(const function *fun);
 
 /*
  * Splits each basic block in fun that contains at least 2 MPI collectives.
  */
-void mpi_call_split(const function *fun);
+void mpicoll_split(const function *fun);
 
 /*
  * Returns MPI collectives’s rank in fun using cfg. Loop backedges in cfg must
@@ -70,15 +70,15 @@ void mpi_call_split(const function *fun);
  *
  * See frontier_compute_cfg_bis() for details.
  */
-bitmap mpi_call_ranks(const function *fun, bitmap cfg);
+bitmap mpicoll_ranks(const function *fun, bitmap cfg);
 
 /*
  * Returns MPI collective location in bb. The basic block must contain only one
  * MPI collective gimple statement. If bb does not contain MPI collective, this
  * function returns UNKNOWN_LOCATION.
  *
- * See mpi_call_split() for details.
+ * See mpicoll_split() for details.
  */
-location_t mpi_call_location(basic_block bb);
+location_t mpicoll_location(basic_block bb);
 
-#endif /* mpi_call.h */
+#endif /* mpicoll.h */

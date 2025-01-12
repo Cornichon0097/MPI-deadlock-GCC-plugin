@@ -137,7 +137,7 @@ static int frontier_find_group(const function *const fun, const basic_block bb,
  * collective codes must be set in basic blocks’s aux field before calling this
  * function.
  *
- * See mpi_call_mark_code() for details.
+ * See mpicoll_mark_code() for details.
  */
 bitmap frontier_make_groups(const function *const fun, const bitmap ranks)
 {
