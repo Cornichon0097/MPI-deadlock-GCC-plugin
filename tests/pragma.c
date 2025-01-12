@@ -3,10 +3,10 @@
 
 #include <mpi.h>
 
-#pragma mpicoll
-#pragma mpicoll check
 #pragma mpicoll check mpi_call
 #pragma mpicoll check (mpi_call, main)
+
+#pragma mpicoll check not_a_function
 
 void mpi_call(int rank)
 {
