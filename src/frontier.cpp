@@ -17,8 +17,6 @@
  */
 #include <gcc-plugin.h>
 
-#include <queue>
-
 #include "frontier.h"
 
 /*
@@ -69,7 +67,7 @@ bitmap frontier_compute_post_dominance(const function *const fun)
  */
 bitmap frontier_compute_cfg_bis(const function *const fun)
 {
-        std::queue<basic_block> bb_queue;
+        auto_vec<basic_block> bb_queue;
         bitmap_head *cfg, *visited_blocks;
         basic_block bb;
         edge e;
@@ -84,12 +82,11 @@ bitmap frontier_compute_cfg_bis(const function *const fun)
                                   &bitmap_default_obstack);
         }
 
-        bb_queue.push(ENTRY_BLOCK_PTR_FOR_FN(fun));
+        bb_queue.safe_push(ENTRY_BLOCK_PTR_FOR_FN(fun));
 
-        while (!bb_queue.empty()) {
-                bb = bb_queue.front();
+        while (bb_queue.length()) {
+                bb = bb_queue.pop();
                 bitmap_set_bit(&(visited_blocks[bb->index]), bb->index);
-                bb_queue.pop();
 
                 FOR_EACH_EDGE(e, ei, bb->succs) {
                         if (!bitmap_bit_p(&(visited_blocks[bb->index]),
@@ -98,7 +95,7 @@ bitmap frontier_compute_cfg_bis(const function *const fun)
                                                e->dest->index);
                                 bitmap_copy(&(visited_blocks[e->dest->index]),
                                             &(visited_blocks[bb->index]));
-                                bb_queue.push(e->dest);
+                                bb_queue.safe_push(e->dest);
                         }
                 }
         }
