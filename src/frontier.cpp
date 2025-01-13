@@ -84,7 +84,7 @@ bitmap frontier_compute_cfg_bis(const function *const fun)
 
         bb_queue.safe_push(ENTRY_BLOCK_PTR_FOR_FN(fun));
 
-        while (bb_queue.length()) {
+        while (!bb_queue.is_empty()) {
                 bb = bb_queue.pop();
                 bitmap_set_bit(&(visited_blocks[bb->index]), bb->index);
 
@@ -193,7 +193,7 @@ static bitmap frontier_get_groups_post_dominated(const function *const fun,
 {
         bitmap_head *pdom, new_set;
         auto_vec<basic_block> dom;
-        basic_block bb;
+        basic_block bb, elt;
         edge e;
         bitmap_iterator bi;
         edge_iterator ei;
@@ -211,8 +211,8 @@ static bitmap frontier_get_groups_post_dominated(const function *const fun,
                         bb = BASIC_BLOCK_FOR_FN(fun, bb_index);
                         dom = get_all_dominated_blocks(CDI_POST_DOMINATORS, bb);
 
-                        for (j = 0U; j < dom.length(); ++j)
-                                bitmap_set_bit(&(pdom[dom[j]->index]), i);
+                        FOR_EACH_VEC_ELT(dom, j, elt)
+                                bitmap_set_bit(&(pdom[elt->index]), i);
                 }
         }
 
