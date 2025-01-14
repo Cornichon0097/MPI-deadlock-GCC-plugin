@@ -33,32 +33,40 @@ static auto_vec<const char *> fnames;
 /*
  *
  */
-static void pragma_put_fnames(tree args)
+static void parse_pragma_mpicoll(const tree args)
 {
-        // const char *elt1, *elt2;
-        // unsigned int ix1, ix2;
+        const char *name;
+        unsigned int i;
+        tree iter;
 
-        // FOR_EACH_VEC_ELT(args, ix1, elt1) {
-        //         FOR_EACH_VEC_ELT(fnames, ix2, elt2) {
-        //                 if (strcmp(elt1, elt2) == 0)
-        //                         warning(OPT_Wpragmas, "%s already checked", elt1);
-        //                 else
-        //                         fnames.safe_push(elt1);
-        //         }
-        // }
+        for (iter = args; iter; iter = TREE_CHAIN(iter)) {
+                name = IDENTIFIER_POINTER(TREE_VALUE(iter));
+                fprintf(stderr, "%s\n", name);
+
+                if (fnames.is_empty())
+                        fnames.safe_push(name);
+                else {
+                        for (i = 0U; i < fnames.length(); ++i) {
+                                if (strcmp(fnames[i], name) != 0)
+                                        fnames.safe_push(name);
+                                // else
+                                //         warning(OPT_Wpragmas, "%<#pragma mpicoll check%> adds function %<%s%> multiple times", name);
+                        }
+                }
+        }
 }
 
 /*
  *
  */
-static void handle_pragma_mpicoll_check(cpp_reader *r)
+static void handle_pragma_mpicoll_check(cpp_reader *const r ATTRIBUTE_UNUSED)
 {
         location_t loc;
         enum cpp_ttype token;
         tree x, args = NULL_TREE;
         bool close_paren_needed_p = false;
 
-        if (cfun) {
+        if (cfun != NULL) {
                 error("%<#pragma mpicoll check%> is not allowed inside functions");
                 return;
         }
@@ -77,7 +85,6 @@ static void handle_pragma_mpicoll_check(cpp_reader *r)
 
         do {
                 args = tree_cons(NULL_TREE, x, args);
-                warning(OPT_Wpragmas, "%s added", IDENTIFIER_POINTER(x));
 
                 do
                         token = pragma_lex(&x);
@@ -100,19 +107,40 @@ static void handle_pragma_mpicoll_check(cpp_reader *r)
                 return;
         }
 
-        pragma_put_fnames(args);
+        parse_pragma_mpicoll(args);
 }
 
 /*
  *
  */
-void register_pragma_mpicoll(void *const event_data, void *const data)
+void register_pragma_mpicoll(void *const event_data ATTRIBUTE_UNUSED,
+                             void *const data ATTRIBUTE_UNUSED)
 {
         /* warning(0, G_("Callback to register pragmas")); */
         c_register_pragma("mpicoll", "check", &handle_pragma_mpicoll_check);
 }
 
-bool is_set_pragma_mpicoll(const function *const fun)
+/*
+ *
+ */
+void undefined_pragma_mpicoll(void *const event_data ATTRIBUTE_UNUSED,
+                              void *const data ATTRIBUTE_UNUSED)
 {
-        return true;
+
+}
+
+/*
+ *
+ */
+bool is_set_pragma_mpicoll(function *const fun)
+{
+        const char *elt;
+        unsigned int ix;
+
+        FOR_EACH_VEC_ELT(fnames, ix, elt) {
+                if (strcmp(elt, function_name(fun)) == 0)
+                        return false;
+        }
+
+        return false;
 }

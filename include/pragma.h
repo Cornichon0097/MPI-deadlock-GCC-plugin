@@ -20,8 +20,12 @@
 
 #include <coretypes.h>
 
-void register_pragma_mpicoll(void *event_data, void *data);
+void register_pragma_mpicoll(void *event_data ATTRIBUTE_UNUSED,
+                             void *data ATTRIBUTE_UNUSED);
 
-bool is_set_pragma_mpicoll(const function *fun);
+void undefined_pragma_mpicoll(void *event_data ATTRIBUTE_UNUSED,
+                              void *data ATTRIBUTE_UNUSED);
+
+bool is_set_pragma_mpicoll(function *fun);
 
 #endif /* pragma.h */

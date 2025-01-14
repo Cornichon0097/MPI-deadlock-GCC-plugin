@@ -161,6 +161,8 @@ int plugin_init(struct plugin_name_args *const plugin_info,
                           NULL, &mpi_pass_info);
         register_callback(plugin_info->base_name, PLUGIN_PRAGMAS,
                           &register_pragma_mpicoll, NULL);
+        register_callback(plugin_info->base_name, PLUGIN_FINISH,
+                          &undefined_pragma_mpicoll, NULL);
 
         return 0;
 }

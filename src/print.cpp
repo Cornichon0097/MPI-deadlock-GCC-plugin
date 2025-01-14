@@ -31,12 +31,11 @@
 static void print_dominance(const enum cdi_direction dir, const basic_block bb)
 {
         auto_vec<basic_block> dom = get_all_dominated_blocks(dir, bb);
-        basic_block elt;
-        unsigned int ix;
+        unsigned int i;
 
-        FOR_EACH_VEC_ELT(dom, ix, elt) {
-                if (elt->index != bb->index)
-                        printf("\tNode %d\n", elt->index);
+        for (i = 0U; i < dom.length(); ++i) {
+                if (dom[i]->index != bb->index)
+                        printf("\tNode %d\n", dom[i]->index);
         }
 }
 
