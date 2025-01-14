@@ -21,13 +21,41 @@
 #include <tree.h>
 #include <intl.h>
 
+#include <string.h>
+
 #include "pragma.h"
 
-static void handle_pragma_mpicoll_check(cpp_reader *)
+/*
+ *
+ */
+static auto_vec<const char *> fnames;
+
+/*
+ *
+ */
+static void pragma_put_fnames(tree args)
+{
+        // const char *elt1, *elt2;
+        // unsigned int ix1, ix2;
+
+        // FOR_EACH_VEC_ELT(args, ix1, elt1) {
+        //         FOR_EACH_VEC_ELT(fnames, ix2, elt2) {
+        //                 if (strcmp(elt1, elt2) == 0)
+        //                         warning(OPT_Wpragmas, "%s already checked", elt1);
+        //                 else
+        //                         fnames.safe_push(elt1);
+        //         }
+        // }
+}
+
+/*
+ *
+ */
+static void handle_pragma_mpicoll_check(cpp_reader *r)
 {
         location_t loc;
         enum cpp_ttype token;
-        tree x;
+        tree x, args = NULL_TREE;
         bool close_paren_needed_p = false;
 
         if (cfun) {
@@ -48,31 +76,43 @@ static void handle_pragma_mpicoll_check(cpp_reader *)
         }
 
         do {
-                // warning(OPT_Wpragmas, "Check function %s", IDENTIFIER_POINTER(x));
-                token = pragma_lex(&x);
+                args = tree_cons(NULL_TREE, x, args);
+                warning(OPT_Wpragmas, "%s added", IDENTIFIER_POINTER(x));
 
-                while (token == CPP_COMMA)
+                do
                         token = pragma_lex(&x);
+                while (token == CPP_COMMA);
         } while (token == CPP_NAME);
 
         if (close_paren_needed_p) {
                 if (token == CPP_CLOSE_PAREN)
                         token = pragma_lex(&x);
                 else {
-                        warning(OPT_Wpragmas, "%<#pragma mpicoll check (function [,function]...)%> does "
-                     "not have a final %<)%>");
+                        warning(OPT_Wpragmas, "%<#pragma mpicoll check "
+                                "(function [,function]...)%> does "
+                                "not have a final %<)%>");
                         return;
                 }
         }
 
         if (token != CPP_EOF) {
-                error ("%<#pragma mpicoll check%> string is badly formed");
+                error("%<#pragma mpicoll check%> string is badly formed");
                 return;
         }
+
+        pragma_put_fnames(args);
 }
 
-void register_pragma_mpicoll(void *event_data, void *data)
+/*
+ *
+ */
+void register_pragma_mpicoll(void *const event_data, void *const data)
 {
         /* warning(0, G_("Callback to register pragmas")); */
         c_register_pragma("mpicoll", "check", &handle_pragma_mpicoll_check);
+}
+
+bool is_set_pragma_mpicoll(const function *const fun)
+{
+        return true;
 }

@@ -22,4 +22,6 @@
 
 void register_pragma_mpicoll(void *event_data, void *data);
 
+bool is_set_pragma_mpicoll(const function *fun);
+
 #endif /* pragma.h */

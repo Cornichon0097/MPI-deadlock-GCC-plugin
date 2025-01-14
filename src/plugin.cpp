@@ -79,7 +79,7 @@ public:
          */
         bool gate(function *const fun)
         {
-                return false;
+                return is_set_pragma_mpicoll(fun);
         }
 
         /*
