@@ -3,19 +3,8 @@
 
 #include <mpi.h>
 
-#pragma mpicoll check
-#pragma mpicoll check (,)
-#pragma mpicoll check (mpi_call
-
-#pragma mpicoll check mpi_call
-#pragma mpicoll check (mpi_call, main)
-
-#pragma mpicoll check not_a_function
-
 void mpi_call(int rank)
 {
-#pragma mpicoll check main
-
         MPI_Barrier(MPI_COMM_WORLD);
 
         if (rank == 0) {
@@ -25,7 +14,12 @@ void mpi_call(int rank)
                 printf("Rank %d in 'else'\n", rank);
 }
 
-#pragma mpicoll check main
+#pragma mpicoll check (malicious_wrapper, main)
+
+void malicious_wrapper(int rank)
+{
+        mpi_call(rank);
+}
 
 int main(int argc, char *argv[])
 {
@@ -34,7 +28,7 @@ int main(int argc, char *argv[])
         MPI_Init(&argc, &argv);
 
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-        mpi_call(rank);
+        malicious_wrapper(rank);
 
         MPI_Finalize();
 

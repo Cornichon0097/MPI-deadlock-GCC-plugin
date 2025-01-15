@@ -42,7 +42,8 @@ PLUGIN_INCLUDES_FILES = $(INCLUDEDIR)/print.h \
 TARGETS = $(BINDIR)/hw.out \
           $(BINDIR)/ok.out \
           $(BINDIR)/simple.out \
-          $(BINDIR)/pragma.out
+          $(BINDIR)/pragma.out \
+          $(BINDIR)/bad.out
 
 # ============================= Targets and rules ============================ #
 # ------------------------------ Default target ------------------------------ #
@@ -81,6 +82,11 @@ $(BINDIR)/simple.out: $(TESTSDIR)/simple.c \
 $(BINDIR)/pragma.out: $(TESTSDIR)/pragma.c \
                       $(PLUGIN) \
                       $(BINDIR)
+	$(MPICC) $(CFLAGS) -o $@ -fplugin=./$(PLUGIN) $<
+
+$(BINDIR)/bad.out: $(TESTSDIR)/bad.c \
+                   $(PLUGIN) \
+                   $(BINDIR)
 	$(MPICC) $(CFLAGS) -o $@ -fplugin=./$(PLUGIN) $<
 
 # -------------------------------- Main rules -------------------------------- #
