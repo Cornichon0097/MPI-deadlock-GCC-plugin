@@ -1,5 +1,5 @@
 /*
- *
+ * Function dealing with MPI collective pragmas.
  * Copyright (C) 2023-2025 Antoni Blanche
  *
  * This program is free software: you can redistribute it and/or modify
@@ -26,17 +26,17 @@
 #include "pragma.h"
 
 /*
- *
+ * Returns the function name from a tree node.
  */
 #define FNAME(t) IDENTIFIER_POINTER(TREE_VALUE(t))
 
 /*
- *
+ * All functions tagged by #pragma mpicoll check.
  */
-static auto_vec<tree> fnames;
+static auto_vec<tree> fnames; /* Global variable, yuck */
 
 /*
- *
+ * Returns true if fnames contains t, false otherwise.
  */
 static bool contains_pragma_mpicoll(const tree t)
 {
@@ -54,7 +54,7 @@ static bool contains_pragma_mpicoll(const tree t)
 }
 
 /*
- *
+ * Parses #pragma mpicoll check args and put functions in fnames.
  */
 static void parse_pragma_mpicoll(const tree args)
 {
@@ -70,7 +70,7 @@ static void parse_pragma_mpicoll(const tree args)
 }
 
 /*
- *
+ * Reads a #pragma mpicoll check line and retrieve function names.
  */
 static void handle_pragma_mpicoll_check(cpp_reader *const r ATTRIBUTE_UNUSED)
 {
@@ -125,7 +125,7 @@ static void handle_pragma_mpicoll_check(cpp_reader *const r ATTRIBUTE_UNUSED)
 }
 
 /*
- *
+ * Registers #pragma mpicoll check.
  */
 void register_pragma_mpicoll(void *const event_data ATTRIBUTE_UNUSED,
                              void *const data ATTRIBUTE_UNUSED)
@@ -135,7 +135,7 @@ void register_pragma_mpicoll(void *const event_data ATTRIBUTE_UNUSED,
 }
 
 /*
- *
+ * Prints a warning for each undefined function in fnames.
  */
 void undefined_pragma_mpicoll(void *const event_data ATTRIBUTE_UNUSED,
                               void *const data ATTRIBUTE_UNUSED)
@@ -148,7 +148,7 @@ void undefined_pragma_mpicoll(void *const event_data ATTRIBUTE_UNUSED,
 }
 
 /*
- *
+ * Returns true if fun is tagged by #pragma mpicoll check, false otherwise.
  */
 bool is_set_pragma_mpicoll(function *const fun)
 {

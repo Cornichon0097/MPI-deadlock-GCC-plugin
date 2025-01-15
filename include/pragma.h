@@ -1,5 +1,5 @@
 /*
- *
+ * Declarations and definitions dealing with MPI collective pragmas.
  * Copyright (C) 2023-2025 Antoni Blanche
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,12 +20,21 @@
 
 #include <coretypes.h>
 
+/*
+ * Registers #pragma mpicoll check.
+ */
 void register_pragma_mpicoll(void *event_data ATTRIBUTE_UNUSED,
                              void *data ATTRIBUTE_UNUSED);
 
+/*
+ * Prints a warning for each undefined function in fnames.
+ */
 void undefined_pragma_mpicoll(void *event_data ATTRIBUTE_UNUSED,
                               void *data ATTRIBUTE_UNUSED);
 
+/*
+ * Returns true if fun is tagged by #pragma mpicoll check, false otherwise.
+ */
 bool is_set_pragma_mpicoll(function *fun);
 
 #endif /* pragma.h */
