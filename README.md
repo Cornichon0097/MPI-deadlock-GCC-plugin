@@ -45,7 +45,8 @@ $ <INSTALLDIR>/bin/gcc -print-file-name=plugin
 
 ## GCC plugins
 
-While GCC is installing, you can take a look at these resources:
+While GCC is installing, you can take a look at these resources for a better
+understanding of GCC plugins:
 - [GCC plugins documentation](https://gcc.gnu.org/onlinedocs/gcc-12.2.0/gccint/Plugins.html#Plugins)
 - [Experiments with the GCC plugin mechanism](https://github.com/rofirrim/gcc-plugins)
 
@@ -82,4 +83,56 @@ g++_1220         gcc_1220
 $ export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Here `$HOME/.local` is the `<INSTALLDIR>`.
+where `$HOME/.local` is the `<INSTALLDIR>`.
+
+Finally, you can just use the full path of the executable directly in the
+Makefile:
+
+```Makefile
+# -------------------------------- Compilers --------------------------------- #
+CC     = <INSTALLDIR>/bin/gcc
+MPICC  = mpicc # export MPICH_CC="<INSTALLDIR>/bin/gcc"
+CFLAGS = #-Wall -Wextra -Wstrict-prototypes -Wunreachable-code -Werror -O3 -g
+
+CXX = <INSTALLDIR>/bin/g++
+
+PLUGIN_FLAGS = -I`$(CC) -print-file-name=plugin`/include -I$(INCLUDEDIR) \
+               -Wall -fPIC -fno-rtti -g -shared
+```
+
+## Test the plugin
+
+Build the plugin with `make`:
+
+```
+$ make
+g++_1220 -I`gcc_1220 -print-file-name=plugin`/include -Iinclude -Wall -fPIC -fno-rtti -g -shared  -o libmpiplugin.so src/plugin.cpp src/print.cpp src/cfgviz.cpp src/mpicoll.cpp src/frontier.cpp src/pragma.cpp
+```
+
+The plugin analyses only the functions tagged by `#pragma mpicoll check`:
+
+```c
+#pragma mpicoll check mpi_call
+#pragma mpicoll check main
+```
+
+or
+
+```c
+#pragma mpicoll check (mpi_call, main)
+```
+
+Build provided tests with `make tests` or build your own with:
+
+```
+mpicc [-o <EXEC>] -fplugin=./libmpiplugin.so yourfile.c
+```
+
+## Tweak the plugin
+
+The current version of the plugin only checks MPI collectives provided in the
+[`include/MPI_collectives.def`](include/MPI_collectives.def) file. Add or remove
+function names to enable or disable respectively verification for a specific
+MPI collective.
+
+When adding a new collective, make sure the first parameter is unique.
